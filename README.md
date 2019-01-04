@@ -1,4 +1,4 @@
-# PushNotification-Study
+# Push-Notification-Study
 
 ## Chapter 1: Introduction
 Push Notification 이 사용자에게 전달되는 여부는 보장되지 않으므로, 사용자가 Push Notification을 못받을 수도 있다고 생각해야한다.
@@ -6,91 +6,97 @@ Push Notification 이 사용자에게 전달되는 여부는 보장되지 않으
 ## Chapter 2: Push Notifications
 Notification은 특정조건에 따라 로컬기반으로 동작할 수 도 있고, 원격서비스가 디바이스로 보낼수도 있다.
 
-#### REMOTE NOTIFICATIONS
+#### What are they good for?
+유저 경험에 대해 항상생각해야된다.
+
+#### Remote notifications
 Remote notification은 가장 흔한 타입으로, 서버나 다른서비스에 의해 디바이스로 보내지는 형태
 애플은 TransportLayerSecurity(TLS)를 이용해 Apple Push Notification Service(APNs)을 제공하고, 앱 notification을 이용해서 APN을 사용해야한다.
 
-#### SECURITY
+#### Security
 iOS 디바이스들은 APN 인증을 통해 Device token을 받고, Provider에게 알려주어, notification을 받을 수 있게 된다.
 사용자가 다른 디바이스에 앱을 설치 할 수도 있기 때문에 Device token은 캐싱하면 안된다.
 Device token은 서버입장에서 특정 유저를 식별하는 주소인 셈.
 
-#### NOTIFICATION MESSAGE FLOW
-Device에서 APN에 토큰 요청하고 받은 뒤, Provider에게 보내고, Provider가 DeviceToken을 APN에 보내 APN에서 노해당 디바이스에 Notification을 보낸다.
+#### Notification message flow
+Device에서 APN에 토큰 요청하고 받은 뒤, Provider에게 보내고, Provider가 DeviceToken을 APN에 보내 APN에서 노해당 디바이스에 Notification을 보낸다.  
 
-#### LOCAL NOTIFICATIONS
+#### Local notifications
 Local notification은 remote notification과 달리 디바이스에 의해 생성된다.
 
-#### LOCATION AWARE
+#### Location aware
 위치서비스와 연동해서 특정지역에 있을때 notification을 보내는 등의 처리가 가능하다.
 
 ## Chapter3: Remote Notification Payload
 Notification payload는 JSON으로 되어있고, 최대크기는 4KB이다.
 몇몇 키는 필수이나 대부분은 옵셔널이고, 이 챕터에서는 predefined key에 대해 다룰예정이다.
 
-#### THE APP DICTIONARY KEY
+#### The app dictionary key
 Aps key는 notification payload의 중요 키이며, 보여질 메시지, 뱃지 수, 노티 도착시 소리, 유저 인터랙션여부에 따른 알림 발생여부, 액션에 따른트리거여부 등을 설정 할 수 있다.
 
-#### ALERT
+#### Alert
 alert키는 사용자에게 보여질 메시지를 정의한다.
 alert키 하위의 title, body를 이용해서 메시지를 정의 할수 있지만, localization고려를 위해 title-loc-key(+title-loc-args), loc-key(+loc-args)를 이용한다.
 iOS12 부터 alert하위의 thread_identifer 키를 이용해서 같은 identifer값을 갖는 노티피케이션들을 그룹으로 묶을수 있다.
 
-#### BADGE
+#### Badge
 Aps 하위 badge키를 통해 앱아이콘에 표현될 뱃지 수를 지정한다.
 이때 badge number는 수식이 아닌 absolute Value이다
+Badge 제거하고싶으면 0으로 설정
 
-#### SOUND
+#### Sound
 Aps 하위 sound키를 통해 알림의 소리를 설정 할 수 있다.
 커스텀 사운드를 설정하는 것은 사용자들이 싫어할수도 있으니 신중해라..
 Critical alert sounds를 따로 지정할 수도 있다.
 
-#### OTHER PREDEFINED KEYS
-이외에 3개의 키 가 더있ㅇ는데, 백그라운드 알림 업데이트, 커스텀타입, 그룹핑 할때 사용되고, 이후 챕터에서 자세하게 다룰예정이다.
+#### Other predefined keys
+이외에 3개의 키 가 더있는데, 백그라운드 알림 업데이트, 커스텀타입, 그룹핑 할때 사용되고, 이후 챕터에서 자세하게 다룰예정이다.
 
-#### YOUR CUSTOM DATA
+#### Your custom data
 Aps 키 밖의 것들은 개인목적으로 커스텀하게 사용가능하다.
 
-#### COLLAPSING NOTIFICATIONS
+#### Collapsing notifications
 서버에서 APN으로 보낼때 키값이 apns-collapse-id 헤더필드를 보내는데, 해당 키값이 같다면 이전에 전달받았던 notification은 삭제된다.
 
 ## Chapter 4: Xcode Project Setup
 Push Notification에 대한 Custom Profile설정을 하지 않았어도, Xcode - Target - Capability의 기능을 ON시키면 자동으로 추가된다.
 
-#### ADDING CAPABILITIES
+#### Adding Capabilities
 Xcode - Target - Capability에서 PushNotification 기능을 ON 시킨다.
 
-#### REGISTERING FOR NOTIFICATIONS
+#### Registering for notifications
 앱이 시작될때 푸시 권한체크를 해주어야한다.
 권한체크를 위해 UNUserNotificationCenter.current().requestAuthorization 메서드를 이용한다.
 이때 notification closure는 메인쓰레드에서 동작하지 않으므로 디바이스 등록 메서드는 메인쓰레드에서 실행되도록 DispatchQueue를 이용한다.
 RemoteNotification등록을 위해 UIApplication.registerForRemoteNotifications() 를 이용한다.
 
-#### PROVISIONAL AUTHORIZATION
+#### Provisional authorization
 UNAuthorizationOptions enum의 .provisional 옵션을 사용하면 Notification이 Permission 없이 사운드와 얼럿을 일으키지 않고 사용자의 알림센터에 전달된다.
 
-#### CRITICAL ALERTS
+#### Critical alerts
 Critical alerts는 .criticalAlert 옵션을 사용해서 생성할 수 있고, Critical alerts는 방해금지/유저의 알림 거부여부와 상관없이 alert sound를 재생한다.
 사용하기 위해서는 애플로부터 승인을 받아야한다.
 
-#### GETTING THE DEVICE TOKEN
+#### Getting the device token
 디바이스토큰은 APNs에 등록된 앱 디바이스를 식별하는 Globally Unique한 ID이다.
-디바이스 등록이 완료되면 application(_:didRegisterForRemoteNotificationsWithDeviceToken) 메서드가 호출되며 디바이스토큰을 얻을수 있는데, HexCharacter Array 형태 이므로 토큰.reduce(“”) { $0 + String(format: “%02x”, $1) }를 이용해서 String으로 변환해준다.
+디바이스 등록이 완료되면 
+```application(_:didRegisterForRemoteNotificationsWithDeviceToken)```
+메서드가 호출되며 디바이스토큰을 얻을수 있는데, Data타입이므로 ```토큰.reduce(“”) { $0 + String(format: “%02x”, $1) }```를 이용해서 String으로 변환해준다.
 디바이스 토큰의 길이는 애플 정책에 의해 바뀔수 있기 떄문에 하드코딩해서 사용하지 말아야한다.
 디바이스 토큰은 앱을 새로 설치하거나, 백업 복구 등에 의해 바뀔수 있는 점을 기억해야한다.
 
 ## Chapter5: Apple Push Notification Servers
 Authentication Token은 애플서버에서 앱을 신뢰하기 위해 사용된다. Authentication Token을 통해 서버 유효성을 체크하고, 서버와 APNs 간 secure connection을 보장한다.
 
-#### TOKEN TYPES
+#### Token types
 예전에는 확장자가 .p12인 PKCS #12(PFX) 포맷을 썼는데, 1년마다 갱신해야되고, development와 distributions 인증서가 분리되어 있으며 앱별로 분리 되어있어야 하는 불편함이 있었다.
 2016년 .p8 확장자를 사용하는 JSON Web Tokens(JWT)가 나오며 p12의 불편함을 모두 개선했다.
 
-#### GETTING YOUR AUTHENTICATION TOKEN
+#### Getting your Authentication Token
 Authentication Token 생성을 위해 Member Center의 Keys 섹션의 APNs Key Services타입의 키를 생성한다.
 키를 생성하고 다운받으면 파일명이 AuthKey_KeyID.p8 인 파일이 다운로드 되고, KeyID 자리(_와 .사이)에 있는 String이 KeyID이다.
 
-#### SENDING A PUSH
+#### Sending a push
 푸시를 보낼때 Authentication Token, Device Token, BundleID가 필요하며, 이를 이용한 실습(굳)
 
 ## Chapter6: Server Side Pushes
@@ -331,6 +337,3 @@ UNLocationNotificationTrigger 인스턴스를 이용해서 해당 지역에 진�
 
 #### Calendar Notifications
 UNCalendarNotificationTrigger 인스턴스를 이용해서 특정일시에 Notification을 보낼 수 있다.
-
-
-
